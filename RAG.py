@@ -6,7 +6,6 @@ import json
 import obonet
 import inflect
 import networkx as nx
-import matplotlib.pyplot as plt
 from openai import OpenAI
 from pydantic import BaseModel
 # import google.generativeai as genai
