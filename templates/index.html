@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Cell Annotation Tool</title>
+</head>
+<body>
+    <h1>LLM Cell Annotation Tool</h1>
+
+    <form>
+        <!-- Function Selection Dropdown -->
+        <label for="functionSelect">Select Model:</label>
+        <select id="functionSelect">
+            <option value="Function1">"GPT-4o + RAG (Lung tissue)"</option>
+        </select>
+        <br><br>
+
+        <!-- Input Area for Clusters and Markers -->
+        <label for="inputText">Input Clusters and Markers:</label><br>
+        <textarea 
+            id="inputText" 
+            rows="6" 
+            cols="70" 
+            style="width: 80%;"
+            placeholder="e.g., Cluster1: marker1, marker2\nCluster2: markerA, markerB">
+Cluster1: EMP2, AGER, GPRC5A, LMO7, RTKN2, ARHGEF26, LAMA3, DST, SPOCK2, SCEL
+Cluster2: MS4A1, BANK1, LINC00926, CD79A, BLK, CD79B, VPREB3, SP140, CD22, ADAM28
+Cluster3: KRT15, S100A2, KRT17, KRT5, KRT19, PERP, CLDN1, FHL2, DST, ITGA2</textarea>
+        <br><br>
+
+        <!-- Submit Button -->
+        <button type="button" onclick="callFunction()">Submit</button>
+    </form>
+
+    <!-- Output Section -->
+    <h2>Output:</h2>
+    <pre id="output"></pre>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // Function to call the backend API
+        function callFunction() {
+            const selectedFunction = document.getElementById("functionSelect").value;
+            const inputText = document.getElementById("inputText").value;
+            const clusters = parseInput(inputText); // Parse input into a dictionary
+
+            // Send POST request to the backend
+            fetch("/process", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    function: selectedFunction,
+                    clusters: clusters
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const output = formatOutput(data); // Format output
+                document.getElementById("output").innerText = output;
+            })
+            .catch(error => {
+                document.getElementById("output").innerText = "Error: " + error;
+            });
+        }
+
+        // Parse the input text area into a dictionary
+        function parseInput(inputText) {
+            const lines = inputText.split("\n");
+            const clusters = {};
+
+            lines.forEach(line => {
+                const parts = line.split(":");
+                if (parts.length === 2) {
+                    const clusterName = parts[0].trim();
+                    const markers = parts[1]
+                        .split(",")
+                        .map(marker => marker.trim())
+                        .join(", ");
+                    clusters[clusterName] = markers;
+                }
+            });
+
+            return clusters;
+        }
+
+        // Format the output data for display
+        function formatOutput(data) {
+            let outputText = "";
+            for (const [key, value] of Object.entries(data)) {
+                outputText += `${key}: ${value}\n`;
+            }
+            return outputText;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+pandas
+openai
+pydantic
+python-dotenv
+obonet
+inflect
